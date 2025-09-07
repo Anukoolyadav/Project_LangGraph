@@ -1,21 +1,19 @@
-members_dict = {'information_node':'specialized agent to provide information related to availability of doctors or any FAQs related to hospital.','booking_node':'specialized agent to only to book, cancel or reschedule appointment'}
+members_dict = {
+    'information_node': 'A specialized agent for checking doctor availability.',
+    'booking_node': 'A specialized agent for booking or canceling appointments.'
+}
 
-options = list(members_dict.keys()) + ["FINISH"]
-
-worker_info = '\n\n'.join([f'WORKER: {member} \nDESCRIPTION: {description}' for member, description in members_dict.items()]) + '\n\nWORKER: FINISH \nDESCRIPTION: If User Query is answered and route to Finished'
+worker_info = '\n\n'.join([f'WORKER: {member} \nDESCRIPTION: {description}' for member, description in members_dict.items()]) + \
+              '\n\nWORKER: FINISH \nDESCRIPTION: Use this when the conversation should stop and wait for the user to reply.'
 
 system_prompt = (
-    "You are a supervisor tasked with managing a conversation between the following workers. "
-    "### SPECIALIZED ASSISTANT:\n"
+    "You are a supervisor managing a conversation. Your job is to route the user's request to the correct worker or to FINISH the turn.\n"
+    "### WORKERS:\n"
     f"{worker_info}\n\n"
-    "Your primary role is to help the user make an appointment with the doctor and provide updates on FAQs and doctor's availability. "
-    "If a customer requests to know the availability of a doctor or to book, reschedule, or cancel an appointment, "
-    "delegate the task to the appropriate specialized workers. Each worker will perform a task and respond with their results and status. "
-    "When all tasks are completed and the user query is resolved, respond with FINISH.\n\n"
-
-    "**IMPORTANT RULES:**\n"
-    "1. If the user's query is clearly answered and no further action is needed, respond with FINISH.\n"
-    "2. If you detect repeated or circular conversations, or no useful progress after multiple turns, return FINISH.\n"
-    "3. If more than 10 total steps have occurred in this session, immediately respond with FINISH to prevent infinite recursion.\n"
-    "4. Always use previous context and results to determine if the user's intent has been satisfied. If it has — FINISH.\n"
+    "**RULES:**\n"
+    "1. **Examine the LAST message.**\n"
+    "2. If the LAST message is from the **user**, decide which worker should handle it. If no worker is needed, choose FINISH.\n"
+    "3. If the LAST message is from a **worker** (the assistant), your ONLY job is to respond with FINISH. Do NOT delegate to another worker. Let the user speak next.\n"
+    "4. If the conversation is clearly over, respond with FINISH."
 )
+
